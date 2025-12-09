@@ -13,9 +13,6 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
-    <Filter Include="Resource Files\Textures">
-      <UniqueIdentifier>{251d3aeb-5603-4105-b518-4c1703684e46}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Source Files\Shaders">
       <UniqueIdentifier>{1ce0964f-8bf8-4a82-b86d-c4d7b9534fdb}</UniqueIdentifier>
     </Filter>
@@ -38,37 +35,52 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
-    <None Include="Aquarium.frag">
+    <None Include="Aquarium.vert">
       <Filter>Source Files\Shaders</Filter>
     </None>
-    <None Include="Aquarium.vert">
+    <None Include="Texture.frag">
+      <Filter>Source Files\Shaders</Filter>
+    </None>
+    <None Include="Texture.vert">
+      <Filter>Source Files\Shaders</Filter>
+    </None>
+    <None Include="Aquarium.frag">
       <Filter>Source Files\Shaders</Filter>
     </None>
   </ItemGroup>
   <ItemGroup>
-    <Image Include="..\anchor.png">
-      <Filter>Resource Files\Textures</Filter>
+    <Image Include="..\..\..\clown_fish.png">
+      <Filter>Resource Files</Filter>
     </Image>
-    <Image Include="..\food.png.png">
-      <Filter>Resource Files\Textures</Filter>
+    <Image Include="..\..\..\food.png.png">
+      <Filter>Resource Files</Filter>
     </Image>
-    <Image Include="..\sand.png">
-      <Filter>Resource Files\Textures</Filter>
+    <Image Include="..\..\..\gold_fish.png">
+      <Filter>Resource Files</Filter>
     </Image>
-    <Image Include="..\chest_closed.png">
-      <Filter>Resource Files\Textures</Filter>
+    <Image Include="..\..\..\sand.png">
+      <Filter>Resource Files</Filter>
     </Image>
-    <Image Include="..\chest_open.png">
-      <Filter>Resource Files\Textures</Filter>
+    <Image Include="..\..\..\anchor.png">
+      <Filter>Resource Files</Filter>
     </Image>
-    <Image Include="..\clown_fish.png">
-      <Filter>Resource Files\Textures</Filter>
+    <Image Include="..\..\..\chest_closed.png">
+      <Filter>Resource Files</Filter>
     </Image>
-    <Image Include="..\gold_fish.png">
-      <Filter>Resource Files\Textures</Filter>
+    <Image Include="..\..\..\chest_open.png">
+      <Filter>Resource Files</Filter>
     </Image>
-    <Image Include="..\bubble.png">
-      <Filter>Resource Files\Textures</Filter>
+    <Image Include="..\..\..\bubble.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="..\..\..\student.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="..\..\..\seagrass2.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="..\..\..\seagrass.png">
+      <Filter>Resource Files</Filter>
     </Image>
   </ItemGroup>
 </Project>
