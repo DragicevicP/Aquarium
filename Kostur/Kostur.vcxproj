@@ -134,17 +134,22 @@
   <ItemGroup>
     <None Include="Aquarium.frag" />
     <None Include="Aquarium.vert" />
+    <None Include="Texture.vert" />
+    <None Include="Texture.frag" />
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
-    <Image Include="..\anchor.png" />
-    <Image Include="..\bubble.png" />
-    <Image Include="..\chest_closed.png" />
-    <Image Include="..\chest_open.png" />
-    <Image Include="..\clown_fish.png" />
-    <Image Include="..\food.png.png" />
-    <Image Include="..\gold_fish.png" />
-    <Image Include="..\sand.png" />
+    <Image Include="..\..\..\anchor.png" />
+    <Image Include="..\..\..\bubble.png" />
+    <Image Include="..\..\..\chest_closed.png" />
+    <Image Include="..\..\..\chest_open.png" />
+    <Image Include="..\..\..\clown_fish.png" />
+    <Image Include="..\..\..\food.png.png" />
+    <Image Include="..\..\..\gold_fish.png" />
+    <Image Include="..\..\..\sand.png" />
+    <Image Include="..\..\..\seagrass.png" />
+    <Image Include="..\..\..\seagrass2.png" />
+    <Image Include="..\..\..\student.png" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
