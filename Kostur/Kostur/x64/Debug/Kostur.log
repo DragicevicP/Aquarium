@@ -1,4 +1,4 @@
 ﻿  Main.cpp
-C:\Users\Petar\Desktop\grafika\Aquarium\Kostur\Source\Main.cpp(162,73): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
-C:\Users\Petar\Desktop\grafika\Aquarium\Kostur\Source\Main.cpp(162,63): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
+C:\Users\Petar\Desktop\grafika\Aquarium\Kostur\Source\Main.cpp(170,73): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
+C:\Users\Petar\Desktop\grafika\Aquarium\Kostur\Source\Main.cpp(170,63): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
   Kostur.vcxproj -> C:\Users\Petar\Desktop\grafika\Aquarium\Kostur\x64\Debug\Kostur.exe

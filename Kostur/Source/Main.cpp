@@ -12,11 +12,16 @@
 const double TARGET_FRAME_TIME = 1.0 / 75.0;
 
 static bool shouldClose = false;
+static bool isChestOpen = false;
 
 void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods)
 {
     if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS) {
         shouldClose = true;
+    }
+    if (key == GLFW_KEY_C && action == GLFW_PRESS)
+    {
+        isChestOpen = !isChestOpen;
     }
 }
 
@@ -110,6 +115,10 @@ int main()
     GLuint textureSand = prepereTexture("Resources/sand.png");
     GLuint seagrassTexture = prepereTexture("Resources/seagrass.png");
     GLuint seagrass2Texture = prepereTexture("Resources/seagrass2.png");
+    GLuint chestOpenTexture = prepereTexture("Resources/chest_open.png");
+    GLuint chestClosedTexture = prepereTexture("Resources/chest_closed.png");
+    GLuint jewelTexture = prepereTexture("Resources/jewel.png");
+    GLuint goldTexture = prepereTexture("Resources/gold.png");
    
 
     GLint colorLoc = glGetUniformLocation(shaderProgram, "u_color");
@@ -170,6 +179,31 @@ int main()
         drawTexturePixels(textureShader, seagrassTexture, 200.0f, (float)fbH - 320.0f, 160.0f, 300.0f, fbW, fbH);
         drawTexturePixels(textureShader, seagrassTexture, 400.0f, (float)fbH - 580.0f, 160.0f, 500.0f, fbW, fbH);
         drawTexturePixels(textureShader, seagrassTexture, 900.0f, (float)fbH - 400.0f, 160.0f, 300.0f, fbW, fbH);
+
+        //kovceg
+        float chestWidth  = 350.0f;
+        float chestHeight = 350.0f;
+        float chestX = fbW - 400.0f;                
+        float chestY = fbH - 400.0f;
+
+        GLuint chestTex = isChestOpen ? chestOpenTexture : chestClosedTexture;
+        drawTexturePixels(textureShader, chestTex, chestX, chestY, chestWidth, chestHeight, fbW, fbH);
+
+        //blago
+        float goldWidth = 300.0f;
+        float goldHeight = 250.0f;
+        float goldX = fbW - 370.0f;
+        float goldY = chestY;
+
+        float jewelWidth = 80.0f;
+        float jewelHeight = 100.0f;
+        float jewelX = goldX + 70.0f;
+        float jewelY = goldY + 100.0f;
+        if (isChestOpen) {
+            drawTexturePixels(textureShader, goldTexture, goldX, goldY, goldWidth, goldHeight, fbW, fbH);
+            drawTexturePixels(textureShader, jewelTexture, jewelX, jewelY, jewelWidth, jewelHeight, fbW, fbH);
+        }
+
 
         glfwSwapBuffers(window);
         glfwPollEvents();
