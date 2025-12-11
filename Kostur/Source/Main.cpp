@@ -2,106 +2,29 @@
 #include <GLFW/glfw3.h>
 
 #include "../Header/Util.h"
+#include "../Header/Bubble.h"
+#include "../Header/Fish.h"
+#include "../Header/Rect.h"
+#include "../Header/Food.h"
 
 #include <chrono>
 #include <thread>
 #include <vector>
 #include <iostream>
 
-
-
 const double TARGET_FRAME_TIME = 1.0 / 75.0;
 static bool shouldClose = false;
 static bool isChestOpen = false;
 float deltaTime = 5.0f;
 
-struct Rect {
-    float x, y, w, h;
-};
-
-struct Bubble {
-    float x, y;
-    float size;
-    float speed;
-    bool alive;
-};
-
-struct Fish {
-    float x, y;
-    float w, h;
-    float speed;
-    bool facingRight;
-    GLuint texture;
-    float nextBubbleTime;
-};
-
-struct Food {
-    float x, y;
-    float size;
-    bool alive;
-    float speed; 
-};
-
-Fish goldfish = { 500.0f, 600.0f, 180.0f, 100.0f, 15000.0f, true, 0 , 0.0f};
-Fish clownfish = { 1000.0f, 500.0f, 170.0f, 90.0f, 25000.0f, true, 0 , 0.0f};
-
-
-std::vector<Bubble> bubbles;
-int goldfishBubbleCount = 0;
-int clownfishBubbleCount = 0;
+Fish goldfish;
+Fish clownfish;
 
 std::vector<Food> foods;
-bool spawnFood = false;
+std::vector<Bubble> bubbles;
 
-float calculateBubbleX(Fish fish) {
-    float bubbleX = 0;
-    if (fish.facingRight == true) {
-        bubbleX = fish.x + fish.w;
-    }
-    else {
-        bubbleX = fish.x;
-    }
-    return bubbleX;
-}
-
-Bubble createBubble(const Fish& fish)
-{
-    Bubble b;
-    b.x = calculateBubbleX(fish);
-    b.y = fish.y + fish.h / 2;
-    b.size = 30;
-    b.speed = 7000.0f;
-    b.alive = true;
-
-    return b;
-     
-}
-
-Food createFood(float x)
-{
-    Food f;
-    f.x = x;
-    f.y = 0.0f;          
-    f.size = 40.0f;      
-    f.alive = true;
-    f.speed = 2000.0f;    
-    return f;
-}
-
-
-
-void updateBubbleSpawner(Fish& fish, int& bubbleCount, std::vector<Bubble>& bubbles)
-{
-    float now = glfwGetTime();
-
-    if (bubbleCount > 0 && now >= fish.nextBubbleTime)
-        {
-            bubbles.push_back(createBubble(fish));
-            bubbleCount--;
-            fish.nextBubbleTime = now + 0.3f;
-        }
-    
-}
+int goldfishBubbleCount = 0;
+int clownfishBubbleCount = 0;
 
 
 void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods)
@@ -110,11 +33,13 @@ void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods
     int fbW, fbH;
     glfwGetFramebufferSize(window, &fbW, &fbH);
 
-    if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS) 
+    if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS) {
         shouldClose = true;
+    }
     
-    if (key == GLFW_KEY_C && action == GLFW_PRESS) 
+    if (key == GLFW_KEY_C && action == GLFW_PRESS) {
         isChestOpen = !isChestOpen;
+    }
 
     if (key == GLFW_KEY_Z && action == GLFW_PRESS)
     {
@@ -140,7 +65,9 @@ void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods
             int minX = static_cast<int>(0.1f * fbW); 
             int maxX = static_cast<int>(0.7f * fbW); 
             float x = static_cast<float>(rand() % (maxX - minX) + minX);
-            foods.push_back(createFood(x));
+            Food food;
+            food.init(x);
+            foods.push_back(food);
         }
     }
 
@@ -158,8 +85,6 @@ GLuint prepereTexture(const char* filepath) {
 
     return texture;
 }
-
-
 
 
 void drawRectPixels(GLuint program, const Rect& r, int screenW, int screenH)
@@ -229,7 +154,7 @@ int main()
     glClearColor(0.8f, 0.8f, 0.8f, 1.0f);
  
     GLuint textureShader = createShader("Shaders/Texture.vert", "Shaders/Texture.frag");
-    GLuint shaderProgram = createShader("Shaders/Aquarium.vert", "Shaders/Aquarium.frag");
+    GLuint colorShader = createShader("Shaders/Color.vert", "Shaders/Color.frag");
  
     GLuint studentTexture = prepereTexture("Resources/student.png"); 
     GLuint textureSand = prepereTexture("Resources/sand.png");
@@ -244,8 +169,11 @@ int main()
     GLuint bubbleTexture = prepereTexture("Resources/bubble.png");
     GLuint foodTexture = prepereTexture("Resources/food.png");
 
-    GLint colorLoc = glGetUniformLocation(shaderProgram, "u_color");
+    GLint colorLoc = glGetUniformLocation(colorShader, "u_color");
     double lastTime = glfwGetTime();
+
+    goldfish.init(500.0f, 600.0f, 180.0f, 100.0f, 15000.0f, true);
+    clownfish.init(1000.0f, 500.0f, 170.0f, 90.0f, 25000.0f, true);
 
     while (!glfwWindowShouldClose(window) && !shouldClose)
     {
@@ -257,20 +185,20 @@ int main()
         glViewport(0, 0, fbW, fbH);
         glClear(GL_COLOR_BUFFER_BIT);
 
-        float aquariumHeight = fbH * 0.60f; // 60% visine
+        float aquariumHeight = fbH * 0.60f; 
         float aquariumX = 0.0f;
         float aquariumY = (float)fbH - aquariumHeight; 
         float aquariumW = (float)fbW;
         float aquariumH = aquariumHeight;
 
         //Crtanje akvarijuma i preko njega providna bela 
-        glUseProgram(shaderProgram);
-        glUniform4f(colorLoc, 0.2f, 0.5f, 1.0f, 1.0f); // plava
+        glUseProgram(colorShader);
+        glUniform4f(colorLoc, 0.2f, 0.5f, 1.0f, 1.0f); 
         Rect blueAquarium = { aquariumX, aquariumY, aquariumW, aquariumH };
-        drawRectPixels(shaderProgram, blueAquarium, fbW, fbH);
+        drawRectPixels(colorShader, blueAquarium, fbW, fbH);
 
-        glUniform4f(colorLoc, 1.0f, 1.0f, 1.0f, 0.2f); // providna bela
-        drawRectPixels(shaderProgram, blueAquarium, fbW, fbH);
+        glUniform4f(colorLoc, 1.0f, 1.0f, 1.0f, 0.2f); 
+        drawRectPixels(colorShader, blueAquarium, fbW, fbH);
 
         //Crtanje crnih ivica
         float border = 10.0f;
@@ -278,15 +206,15 @@ int main()
 
         //Donja ivica
         Rect bottom = { 0.0f, (float)fbH - border, (float)fbW, border };
-        drawRectPixels(shaderProgram, bottom, fbW, fbH);
+        drawRectPixels(colorShader, bottom, fbW, fbH);
 
         //Leva ivica
         Rect left = { 0.0f, aquariumY, border, aquariumH };
-        drawRectPixels(shaderProgram, left, fbW, fbH);
+        drawRectPixels(colorShader, left, fbW, fbH);
 
         //Desna ivica
         Rect right = { aquariumW - border, aquariumY, border, aquariumH };
-        drawRectPixels(shaderProgram, right, fbW, fbH);
+        drawRectPixels(colorShader, right, fbW, fbH);
 
         //Pesak
         glUseProgram(textureShader);
@@ -298,7 +226,6 @@ int main()
         //trava
         drawTexturePixels(textureShader, seagrass2Texture, 50.0f,(float)fbH - 400.0f, 160.0f, 300.0f, fbW, fbH);
         drawTexturePixels(textureShader, seagrass2Texture, 700.0f, (float)fbH - 300.0f, 160.0f, 250.0f, fbW, fbH);
-
         drawTexturePixels(textureShader, seagrassTexture, 200.0f, (float)fbH - 320.0f, 160.0f, 300.0f, fbW, fbH);
         drawTexturePixels(textureShader, seagrassTexture, 400.0f, (float)fbH - 580.0f, 160.0f, 500.0f, fbW, fbH);
         drawTexturePixels(textureShader, seagrassTexture, 900.0f, (float)fbH - 400.0f, 160.0f, 300.0f, fbW, fbH);
@@ -331,7 +258,7 @@ int main()
         goldfish.texture = goldFishTexture;
         clownfish.texture = clownFishTexture;
 
-        // --- Pomeranje riba ---
+        //Pomeranje riba
         if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS) goldfish.y -= goldfish.speed * deltaTime;
         if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS) goldfish.y += goldfish.speed * deltaTime;
         if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS) { goldfish.x -= goldfish.speed * deltaTime; goldfish.facingRight = false; }
@@ -342,33 +269,20 @@ int main()
         if (glfwGetKey(window, GLFW_KEY_LEFT) == GLFW_PRESS) { clownfish.x -= clownfish.speed * deltaTime; clownfish.facingRight = false; }
         if (glfwGetKey(window, GLFW_KEY_RIGHT) == GLFW_PRESS) { clownfish.x += clownfish.speed * deltaTime; clownfish.facingRight = true; }
 
-        auto clampFish = [&](Fish& fish) { 
-            if (fish.x < 0) fish.x = 10.0f;
-            if (fish.x + fish.w > fbW) fish.x = fbW  - fish.w;
-            if (fish.y > fbH) fish.y = fbH - fish.h;
-            if (fish.y < fbH * 0.40)
-                fish.y = fbH * 0.40;
-        };
-
-        clampFish(goldfish);
-        clampFish(clownfish);
+        goldfish.clampToBounds(fbW, fbH);
+        clownfish.clampToBounds(fbW, fbH);
 
         drawTextureFlipped(textureShader, goldfish.texture, goldfish.x, goldfish.y, goldfish.w, goldfish.h, goldfish.facingRight, fbW, fbH);
         drawTextureFlipped(textureShader, clownfish.texture, clownfish.x, clownfish.y, clownfish.w, clownfish.h, !clownfish.facingRight, fbW, fbH);
 
 
         //Mehurici
-        updateBubbleSpawner(goldfish, goldfishBubbleCount, bubbles);
-        updateBubbleSpawner(clownfish, clownfishBubbleCount, bubbles);
+        goldfish.trySpawnBubbles(bubbles, goldfishBubbleCount);
+        clownfish.trySpawnBubbles(bubbles, clownfishBubbleCount);
 
+        float minBubbleY = fbH * 0.40f;
         for (auto& b : bubbles) {
-
-            if (!b.alive) continue;
-
-            b.y -= b.speed * deltaTime; 
-
-            if (b.y < fbH * 0.40)
-                b.alive = false;
+            b.update(deltaTime, minBubbleY);
         }
 
         for (auto& b : bubbles) {
@@ -382,33 +296,22 @@ int main()
 
         for (auto& f : foods)
         {
-            if (!f.alive) continue;
-
-            f.y += f.speed * deltaTime;
-
-            if (f.y + f.size >= topSandY)
-                f.y = topSandY - f.size;
-     
-            if (f.x + f.size > goldfish.x && f.x < goldfish.x + goldfish.w &&
-                f.y + f.size > goldfish.y && f.y < goldfish.y + goldfish.h)
-            {
-                f.alive = false;
-                goldfish.h += 0.01f;
-                //goldfish.h += 0.5f;
-            }
-            if (f.x + f.size > clownfish.x && f.x < clownfish.x + clownfish.w &&
-                f.y + f.size > clownfish.y && f.y < clownfish.y + clownfish.h)
-            {
-                f.alive = false;
-                clownfish.h += 0.01f;
-            }
+            f.update(deltaTime, topSandY);
         }
-
 
         for (auto& f : foods)
         {
-            if (f.alive)
+            if (!f.alive) continue;
+            f.checkCollisionWithFish(goldfish);
+            f.checkCollisionWithFish(clownfish);
+        }
+
+        for (auto& f : foods)
+        {
+            if (f.alive) {
                 drawTexturePixels(textureShader, foodTexture, f.x, f.y, f.size, f.size, fbW, fbH);
+            }
+              
         }
 
         glfwSwapBuffers(window);
@@ -424,7 +327,7 @@ int main()
         }
     }
 
-    glDeleteProgram(shaderProgram);
+    glDeleteProgram(colorShader);
     glfwDestroyWindow(window);
     glfwTerminate();
     return 0;

@@ -124,16 +124,23 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Bubble.cpp" />
+    <ClCompile Include="Fish.cpp" />
+    <ClCompile Include="Food.cpp" />
     <ClCompile Include="Source\Main.cpp" />
     <ClCompile Include="Source\Util.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Bubble.h" />
+    <ClInclude Include="Fish.h" />
+    <ClInclude Include="Food.h" />
     <ClInclude Include="Header\stb_image.h" />
     <ClInclude Include="Header\Util.h" />
+    <ClInclude Include="Rect.h" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="Aquarium.frag" />
-    <None Include="Aquarium.vert" />
+    <None Include="Color.frag" />
+    <None Include="Color.vert" />
     <None Include="Texture.vert" />
     <None Include="Texture.frag" />
     <None Include="packages.config" />
