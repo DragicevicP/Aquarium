@@ -1,8 +1,8 @@
 ﻿  Main.cpp
-C:\Users\Petar\Desktop\grafika\Aquarium\Kostur\Source\Main.cpp(75,15): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
-C:\Users\Petar\Desktop\grafika\Aquarium\Kostur\Source\Main.cpp(103,50): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
-C:\Users\Petar\Desktop\grafika\Aquarium\Kostur\Source\Main.cpp(112,51): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
-C:\Users\Petar\Desktop\grafika\Aquarium\Kostur\Source\Main.cpp(262,73): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
-C:\Users\Petar\Desktop\grafika\Aquarium\Kostur\Source\Main.cpp(262,63): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
-C:\Users\Petar\Desktop\grafika\Aquarium\Kostur\Source\Main.cpp(319,30): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
+C:\Users\Petar\Desktop\grafika\Aquarium\Kostur\Source\Main.cpp(95,15): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
+C:\Users\Petar\Desktop\grafika\Aquarium\Kostur\Source\Main.cpp(123,50): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
+C:\Users\Petar\Desktop\grafika\Aquarium\Kostur\Source\Main.cpp(132,51): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
+C:\Users\Petar\Desktop\grafika\Aquarium\Kostur\Source\Main.cpp(293,73): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
+C:\Users\Petar\Desktop\grafika\Aquarium\Kostur\Source\Main.cpp(293,63): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
+C:\Users\Petar\Desktop\grafika\Aquarium\Kostur\Source\Main.cpp(350,30): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
   Kostur.vcxproj -> C:\Users\Petar\Desktop\grafika\Aquarium\Kostur\x64\Debug\Kostur.exe
