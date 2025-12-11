@@ -144,7 +144,7 @@
     <Image Include="..\..\..\chest_closed.png" />
     <Image Include="..\..\..\chest_open.png" />
     <Image Include="..\..\..\clown_fish.png" />
-    <Image Include="..\..\..\food.png.png" />
+    <Image Include="..\..\..\food.png" />
     <Image Include="..\..\..\gold.png" />
     <Image Include="..\..\..\gold_fish.png" />
     <Image Include="..\..\..\jewel.png" />

@@ -52,9 +52,6 @@
     <Image Include="..\..\..\clown_fish.png">
       <Filter>Resource Files</Filter>
     </Image>
-    <Image Include="..\..\..\food.png.png">
-      <Filter>Resource Files</Filter>
-    </Image>
     <Image Include="..\..\..\gold_fish.png">
       <Filter>Resource Files</Filter>
     </Image>
@@ -80,6 +77,15 @@
       <Filter>Resource Files</Filter>
     </Image>
     <Image Include="..\..\..\seagrass.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="..\..\..\gold.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="..\..\..\jewel.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="..\..\..\food.png">
       <Filter>Resource Files</Filter>
     </Image>
   </ItemGroup>

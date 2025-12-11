@@ -35,6 +35,13 @@ struct Fish {
     float nextBubbleTime;
 };
 
+struct Food {
+    float x, y;
+    float size;
+    bool alive;
+    float speed; 
+};
+
 Fish goldfish = { 500.0f, 600.0f, 180.0f, 100.0f, 15000.0f, true, 0 , 0.0f};
 Fish clownfish = { 1000.0f, 500.0f, 170.0f, 90.0f, 25000.0f, true, 0 , 0.0f};
 
@@ -42,6 +49,9 @@ Fish clownfish = { 1000.0f, 500.0f, 170.0f, 90.0f, 25000.0f, true, 0 , 0.0f};
 std::vector<Bubble> bubbles;
 int goldfishBubbleCount = 0;
 int clownfishBubbleCount = 0;
+
+std::vector<Food> foods;
+bool spawnFood = false;
 
 float calculateBubbleX(Fish fish) {
     float bubbleX = 0;
@@ -64,8 +74,18 @@ Bubble createBubble(const Fish& fish)
     b.alive = true;
 
     return b;
-      
-    
+     
+}
+
+Food createFood(float x)
+{
+    Food f;
+    f.x = x;
+    f.y = 0.0f;          
+    f.size = 40.0f;      
+    f.alive = true;
+    f.speed = 2000.0f;    
+    return f;
 }
 
 
@@ -86,15 +106,15 @@ void updateBubbleSpawner(Fish& fish, int& bubbleCount, std::vector<Bubble>& bubb
 
 void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods)
 {
-    if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS) 
-    {
-        shouldClose = true;
-    }
 
-    if (key == GLFW_KEY_C && action == GLFW_PRESS)
-    {
+    int fbW, fbH;
+    glfwGetFramebufferSize(window, &fbW, &fbH);
+
+    if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS) 
+        shouldClose = true;
+    
+    if (key == GLFW_KEY_C && action == GLFW_PRESS) 
         isChestOpen = !isChestOpen;
-    }
 
     if (key == GLFW_KEY_Z && action == GLFW_PRESS)
     {
@@ -110,6 +130,17 @@ void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods
         clownfishBubbleCount = 3;
         if (clownfish.nextBubbleTime < glfwGetTime()) {
             clownfish.nextBubbleTime = glfwGetTime();
+        }
+    }
+
+    if (key == GLFW_KEY_ENTER && action == GLFW_PRESS)
+    {
+        for (int i = 0; i < 5; i++)
+        {
+            int minX = static_cast<int>(0.1f * fbW); 
+            int maxX = static_cast<int>(0.7f * fbW); 
+            float x = static_cast<float>(rand() % (maxX - minX) + minX);
+            foods.push_back(createFood(x));
         }
     }
 
@@ -211,7 +242,7 @@ int main()
     GLuint goldFishTexture = prepereTexture("Resources/gold_fish.png");
     GLuint clownFishTexture = prepereTexture("Resources/clown_fish.png");
     GLuint bubbleTexture = prepereTexture("Resources/bubble.png");
-   
+    GLuint foodTexture = prepereTexture("Resources/food.png");
 
     GLint colorLoc = glGetUniformLocation(shaderProgram, "u_color");
     double lastTime = glfwGetTime();
@@ -343,6 +374,41 @@ int main()
         for (auto& b : bubbles) {
             if (b.alive)
                 drawTexturePixels(textureShader, bubbleTexture, b.x, b.y, b.size, b.size, fbW, fbH);
+        }
+
+
+        //hrana
+        float topSandY = fbH - 100.0f;
+
+        for (auto& f : foods)
+        {
+            if (!f.alive) continue;
+
+            f.y += f.speed * deltaTime;
+
+            if (f.y + f.size >= topSandY)
+                f.y = topSandY - f.size;
+     
+            if (f.x + f.size > goldfish.x && f.x < goldfish.x + goldfish.w &&
+                f.y + f.size > goldfish.y && f.y < goldfish.y + goldfish.h)
+            {
+                f.alive = false;
+                goldfish.h += 0.01f;
+                //goldfish.h += 0.5f;
+            }
+            if (f.x + f.size > clownfish.x && f.x < clownfish.x + clownfish.w &&
+                f.y + f.size > clownfish.y && f.y < clownfish.y + clownfish.h)
+            {
+                f.alive = false;
+                clownfish.h += 0.01f;
+            }
+        }
+
+
+        for (auto& f : foods)
+        {
+            if (f.alive)
+                drawTexturePixels(textureShader, foodTexture, f.x, f.y, f.size, f.size, fbW, fbH);
         }
 
         glfwSwapBuffers(window);
