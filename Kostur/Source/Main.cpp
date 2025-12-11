@@ -19,34 +19,107 @@ struct Rect {
     float x, y, w, h;
 };
 
+struct Bubble {
+    float x, y;
+    float size;
+    float speed;
+    bool alive;
+};
+
 struct Fish {
     float x, y;
     float w, h;
     float speed;
     bool facingRight;
     GLuint texture;
+    float nextBubbleTime;
 };
 
-Fish goldfish = { 500.0f, 600.0f, 180.0f, 100.0f, 15000.0f, true, 0 };
-Fish clownfish = { 1000.0f, 500.0f, 170.0f, 90.0f, 25000.0f, true, 0 };
+Fish goldfish = { 500.0f, 600.0f, 180.0f, 100.0f, 15000.0f, true, 0 , 0.0f};
+Fish clownfish = { 1000.0f, 500.0f, 170.0f, 90.0f, 25000.0f, true, 0 , 0.0f};
 
+
+std::vector<Bubble> bubbles;
+int goldfishBubbleCount = 0;
+int clownfishBubbleCount = 0;
+
+float calculateBubbleX(Fish fish) {
+    float bubbleX = 0;
+    if (fish.facingRight == true) {
+        bubbleX = fish.x + fish.w;
+    }
+    else {
+        bubbleX = fish.x;
+    }
+    return bubbleX;
+}
+
+Bubble createBubble(const Fish& fish)
+{
+    Bubble b;
+    b.x = calculateBubbleX(fish);
+    b.y = fish.y + fish.h / 2;
+    b.size = 30;
+    b.speed = 7000.0f;
+    b.alive = true;
+
+    return b;
+      
+    
+}
+
+
+
+void updateBubbleSpawner(Fish& fish, int& bubbleCount, std::vector<Bubble>& bubbles)
+{
+    float now = glfwGetTime();
+
+    if (bubbleCount > 0 && now >= fish.nextBubbleTime)
+        {
+            bubbles.push_back(createBubble(fish));
+            bubbleCount--;
+            fish.nextBubbleTime = now + 0.3f;
+        }
+    
+}
 
 
 void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods)
 {
-    if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS) {
+    if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS) 
+    {
         shouldClose = true;
     }
+
     if (key == GLFW_KEY_C && action == GLFW_PRESS)
     {
         isChestOpen = !isChestOpen;
     }
+
+    if (key == GLFW_KEY_Z && action == GLFW_PRESS)
+    {
+        goldfishBubbleCount = 3;    
+        if (goldfish.nextBubbleTime < glfwGetTime()) {
+            goldfish.nextBubbleTime = glfwGetTime();
+        }
+       
+    }
+
+    if (key == GLFW_KEY_K && action == GLFW_PRESS)
+    {
+        clownfishBubbleCount = 3;
+        if (clownfish.nextBubbleTime < glfwGetTime()) {
+            clownfish.nextBubbleTime = glfwGetTime();
+        }
+    }
+
+       
+    
 }
 
 GLuint prepereTexture(const char* filepath) {
 
     GLuint texture = loadImageToTexture(filepath);
-    //std::cout << "texSand = " << texture << std::endl;
     glBindTexture(GL_TEXTURE_2D, texture);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
@@ -54,6 +127,8 @@ GLuint prepereTexture(const char* filepath) {
 
     return texture;
 }
+
+
 
 
 void drawRectPixels(GLuint program, const Rect& r, int screenW, int screenH)
@@ -135,6 +210,7 @@ int main()
     GLuint goldTexture = prepereTexture("Resources/gold.png");
     GLuint goldFishTexture = prepereTexture("Resources/gold_fish.png");
     GLuint clownFishTexture = prepereTexture("Resources/clown_fish.png");
+    GLuint bubbleTexture = prepereTexture("Resources/bubble.png");
    
 
     GLint colorLoc = glGetUniformLocation(shaderProgram, "u_color");
@@ -235,8 +311,7 @@ int main()
         if (glfwGetKey(window, GLFW_KEY_LEFT) == GLFW_PRESS) { clownfish.x -= clownfish.speed * deltaTime; clownfish.facingRight = false; }
         if (glfwGetKey(window, GLFW_KEY_RIGHT) == GLFW_PRESS) { clownfish.x += clownfish.speed * deltaTime; clownfish.facingRight = true; }
 
-        auto clampFish = [&](Fish& fish) {
-          
+        auto clampFish = [&](Fish& fish) { 
             if (fish.x < 0) fish.x = 10.0f;
             if (fish.x + fish.w > fbW) fish.x = fbW  - fish.w;
             if (fish.y > fbH) fish.y = fbH - fish.h;
@@ -250,6 +325,25 @@ int main()
         drawTextureFlipped(textureShader, goldfish.texture, goldfish.x, goldfish.y, goldfish.w, goldfish.h, goldfish.facingRight, fbW, fbH);
         drawTextureFlipped(textureShader, clownfish.texture, clownfish.x, clownfish.y, clownfish.w, clownfish.h, !clownfish.facingRight, fbW, fbH);
 
+
+        //Mehurici
+        updateBubbleSpawner(goldfish, goldfishBubbleCount, bubbles);
+        updateBubbleSpawner(clownfish, clownfishBubbleCount, bubbles);
+
+        for (auto& b : bubbles) {
+
+            if (!b.alive) continue;
+
+            b.y -= b.speed * deltaTime; 
+
+            if (b.y < fbH * 0.40)
+                b.alive = false;
+        }
+
+        for (auto& b : bubbles) {
+            if (b.alive)
+                drawTexturePixels(textureShader, bubbleTexture, b.x, b.y, b.size, b.size, fbW, fbH);
+        }
 
         glfwSwapBuffers(window);
         glfwPollEvents();
