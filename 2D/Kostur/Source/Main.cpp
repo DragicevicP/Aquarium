@@ -325,6 +325,8 @@ int main()
         if (sleepTime > 0.0005) {
             std::this_thread::sleep_for(std::chrono::duration<double>(sleepTime));
         }
+
+
     }
 
     glDeleteProgram(colorShader);
