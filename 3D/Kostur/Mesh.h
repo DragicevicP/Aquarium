@@ -1,11 +1,12 @@
 #pragma once
 #include <vector>
 #include <GL/glew.h>
+#include <glm/glm.hpp>
 
 struct Vertex {
-    float x, y, z;
-    float nx, ny, nz;
-    float u, v;
+    float x, y, z;     
+    float r, g, b, a;   
+    float u, v;         
 };
 
 class Mesh {
@@ -15,4 +16,5 @@ public:
 
 private:
     unsigned int VAO, VBO, EBO;
+    unsigned int indexCount;
 };

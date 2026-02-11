@@ -142,31 +142,31 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="Aquarium.cpp" />
-    <ClCompile Include="Bubble.cpp" />
-    <ClCompile Include="Fish.cpp" />
+    <ClCompile Include="FishController.cpp" />
     <ClCompile Include="Food.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Mesh.cpp" />
+    <ClCompile Include="Model.cpp" />
     <ClCompile Include="Util.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="basic.frag" />
     <None Include="basic.vert" />
+    <None Include="hud.frag" />
+    <None Include="hud.vert" />
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Aquarium.h" />
-    <ClInclude Include="Bubble.h" />
-    <ClInclude Include="Fish.h" />
+    <ClInclude Include="FishController.h" />
     <ClInclude Include="Food.h" />
     <ClInclude Include="Mesh.h" />
+    <ClInclude Include="Model.h" />
     <ClInclude Include="stb_image.h" />
     <ClInclude Include="Util.h" />
-    <ClInclude Include="Vertex.h" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="..\..\..\..\sand.png" />
+    <Image Include="res\student.png" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
