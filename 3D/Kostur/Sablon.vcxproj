@@ -142,6 +142,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Bubble.cpp" />
     <ClCompile Include="FishController.cpp" />
     <ClCompile Include="Food.cpp" />
     <ClCompile Include="main.cpp" />
@@ -157,6 +158,7 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Bubble.h" />
     <ClInclude Include="FishController.h" />
     <ClInclude Include="Food.h" />
     <ClInclude Include="Mesh.h" />

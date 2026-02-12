@@ -15,6 +15,7 @@
 #include "Model.h"
 #include "Food.h"
 #include "FishController.h"
+#include "Bubble.h"
 
 void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods) {
     if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS)
@@ -173,6 +174,10 @@ int main() {
 
     Model foodModel("res/food/food.obj");               
     GLuint foodTexture = prepareTexture("res/food/food.png");
+
+    Model bubbleModel("res/bubble/bubble.obj");             
+    GLuint bubbleTexture = prepareTexture("res/bubble/bubble.png"); 
+    BubbleSystem bubbles(1.2f, 5.0f);
 
     glUseProgram(shaderProgram);
     glUniform1i(glGetUniformLocation(shaderProgram, "uTex"), 0);
@@ -337,6 +342,22 @@ int main() {
         if (eatenClown > 0) clownThickness += 0.01f * eatenClown;
 
 
+
+        static bool zPrev = false;
+        bool zNow = glfwGetKey(window, GLFW_KEY_Z) == GLFW_PRESS;
+        if (zNow && !zPrev)
+            bubbles.Spawn3(goldFish.Position());
+        zPrev = zNow;
+
+        static bool kPrev = false;
+        bool kNow = glfwGetKey(window, GLFW_KEY_N) == GLFW_PRESS;
+        if (kNow && !kPrev)
+            bubbles.Spawn3(clownFish.Position());
+        kPrev = kNow;
+
+        bubbles.Update(dt);
+        bubbles.RemoveInactive();
+
         glUseProgram(shaderProgram);
 
         // Dno
@@ -406,6 +427,25 @@ int main() {
         mc = glm::scale(mc, glm::vec3(0.1f, 0.1f * (1.0f + clownThickness), 0.1f));
         glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "uM"), 1, GL_FALSE, glm::value_ptr(mc));
         clownfishModel.Draw();
+
+        // Baloni
+        glEnable(GL_BLEND);
+        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+        glUniform1i(glGetUniformLocation(shaderProgram, "useTex"), 1);
+        glUniform1i(glGetUniformLocation(shaderProgram, "transparent"), 1);
+        glActiveTexture(GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_2D, bubbleTexture);
+        glUniform1i(glGetUniformLocation(shaderProgram, "uTex"), 0);
+
+        for (const auto& b : bubbles.GetBubbles()) {
+            if (b.delay > 0.0f) continue;
+            glm::mat4 m(1.0f);
+            m = glm::translate(m, b.pos);
+            m = glm::scale(m, glm::vec3(0.002f));
+            glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "uM"), 1, GL_FALSE, glm::value_ptr(m));
+            bubbleModel.Draw();
+        }
+        glUniform1i(glGetUniformLocation(shaderProgram, "transparent"), 0);
 
         // Stakla
         glDepthMask(GL_FALSE);
