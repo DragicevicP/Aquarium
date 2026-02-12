@@ -10,10 +10,14 @@ uniform mat4 uP; // Projection
 
 out vec4 channelCol;
 out vec2 channelTex;
+out vec3 vWorldPos;
 
 void main()
 {
-    gl_Position = uP * uV * uM * vec4(inPos, 1.0);
+   vec4 wPos = uM * vec4(inPos, 1.0);
+    vWorldPos = wPos.xyz;
+
+    gl_Position = uP * uV * wPos;
     channelCol = inCol;
     channelTex = inTex;
 }

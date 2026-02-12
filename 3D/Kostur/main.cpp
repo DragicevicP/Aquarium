@@ -17,6 +17,9 @@
 #include "FishController.h"
 #include "Bubble.h"
 
+bool chestOpen = false;
+float chestLidAngle = 0.0f;
+
 void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods) {
     if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS)
         glfwSetWindowShouldClose(window, GLFW_TRUE);
@@ -141,21 +144,13 @@ int main() {
         std::cout << "GLEW nije ucitan!\n";
         return -1;
     }
+    glFrontFace(GL_CCW);
+    glCullFace(GL_BACK);
 
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-    bool enableDepthTest = true;   
-    bool enableFaceCulling = false;
-    if (enableDepthTest) {
-        glEnable(GL_DEPTH_TEST);
-    }else {
-        glDisable(GL_DEPTH_TEST);
-    }
-    if (enableFaceCulling) {
-        glEnable(GL_CULL_FACE);
-    }else {
-        glDisable(GL_CULL_FACE);
-    }
+    bool depthEnabled = true;
+    bool cullEnabled = false;
 
     GLuint shaderProgram = createShader("basic.vert", "basic.frag");
     GLuint hudShader = createShader("hud.vert", "hud.frag");
@@ -178,6 +173,16 @@ int main() {
     Model bubbleModel("res/bubble/bubble.obj");             
     GLuint bubbleTexture = prepareTexture("res/bubble/bubble.png"); 
     BubbleSystem bubbles(1.2f, 5.0f);
+
+    Model chestBase("res/chest/chest_base.obj");
+    Model chestLid("res/chest/chest_lid.obj");
+    GLuint chestTexture = prepareTexture("res/chest/wood.jpg");
+
+    Model coinModel("res/coins/coins.obj");
+    GLuint coinTexture = prepareTexture("res/coins/coins.jpg");
+
+    Model gemModel("res/gem/gem.obj");
+    GLuint gemTexture = prepareTexture("res/gem/gem.jpg");
 
     glUseProgram(shaderProgram);
     glUniform1i(glGetUniformLocation(shaderProgram, "uTex"), 0);
@@ -313,16 +318,27 @@ int main() {
     glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "uV"), 1, GL_FALSE, glm::value_ptr(view));
     glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "uP"), 1, GL_FALSE, glm::value_ptr(projection));
 
-    
+
+    GLFWcursor* anchorCursor = loadImageToCursor("res/anchor.png");
+    if (anchorCursor != nullptr)
+    {
+        glfwSetCursor(window, anchorCursor);
+    }
 
 
     while (!glfwWindowShouldClose(window)) {
         glClearColor(0.3f, 0.5f, 0.7f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        if (depthEnabled) glEnable(GL_DEPTH_TEST);
+        else              glDisable(GL_DEPTH_TEST);
+
+        if (cullEnabled)  glEnable(GL_CULL_FACE);
+        else              glDisable(GL_CULL_FACE);
 
         double now = glfwGetTime();
         float dt = (float)(now - prevTime);
         prevTime = now;
+
 
         goldFish.Update(window, dt, GLFW_KEY_W, GLFW_KEY_S, GLFW_KEY_A, GLFW_KEY_D,GLFW_KEY_Q, GLFW_KEY_E);
         clownFish.Update(window, dt, GLFW_KEY_UP, GLFW_KEY_DOWN, GLFW_KEY_LEFT, GLFW_KEY_RIGHT,GLFW_KEY_K, GLFW_KEY_L);
@@ -358,6 +374,46 @@ int main() {
         bubbles.Update(dt);
         bubbles.RemoveInactive();
 
+
+        static bool cPrev = false;
+        bool cNow = glfwGetKey(window, GLFW_KEY_C) == GLFW_PRESS;
+        if (cNow && !cPrev)
+            chestOpen = !chestOpen;
+        cPrev = cNow;
+
+        float targetAngle = chestOpen ? glm::radians(100.0f) : 0.0f;
+        float speed = 4.0f;
+        chestLidAngle += (targetAngle - chestLidAngle) * (1.0f - expf(-speed * dt));
+
+
+
+        static bool key1Prev = false;
+        bool key1Now = glfwGetKey(window, GLFW_KEY_1) == GLFW_PRESS;
+        if (key1Now && !key1Prev)
+        {
+            depthEnabled = !depthEnabled;
+
+            if (depthEnabled)
+                glEnable(GL_DEPTH_TEST);
+            else
+                glDisable(GL_DEPTH_TEST);
+        }
+        key1Prev = key1Now;
+
+        static bool key2Prev = false;
+        bool key2Now = glfwGetKey(window, GLFW_KEY_2) == GLFW_PRESS;
+        if (key2Now && !key2Prev)
+        {
+            cullEnabled = !cullEnabled;
+
+            if (cullEnabled)
+                glEnable(GL_CULL_FACE);
+            else
+                glDisable(GL_CULL_FACE);
+        }
+        key2Prev = key2Now;
+
+
         glUseProgram(shaderProgram);
 
         // Dno
@@ -378,7 +434,9 @@ int main() {
         glDrawElements(GL_TRIANGLES, sandIndices.size(), GL_UNSIGNED_INT, 0);
 
         // Crni stubovi i okvir oko peska
+        GLboolean wasCull = glIsEnabled(GL_CULL_FACE);
         glDisable(GL_CULL_FACE);
+
         glUniform1i(glGetUniformLocation(shaderProgram, "useTex"), 0); 
         glBindVertexArray(pillarVAO);
 
@@ -393,6 +451,7 @@ int main() {
             glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "uM"), 1, GL_FALSE, glm::value_ptr(m));
             glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, 0);
         }
+       
 
         // Trava
         glUniform1i(glGetUniformLocation(shaderProgram, "useTex"), 1);
@@ -409,6 +468,8 @@ int main() {
             seagrassModel.Draw();
         }
         glUniform1i(glGetUniformLocation(shaderProgram, "transparent"), 0);
+        if (wasCull) glEnable(GL_CULL_FACE);
+        else         glDisable(GL_CULL_FACE);
 
         // Ribice
         glUniform1i(glGetUniformLocation(shaderProgram, "useTex"), 1);
@@ -455,7 +516,8 @@ int main() {
         glBindVertexArray(glassVAO);
         glDrawElements(GL_TRIANGLES, sizeof(glassIndicesArr) / sizeof(unsigned int), GL_UNSIGNED_INT, 0);
         glDepthMask(GL_TRUE);
-        glEnable(GL_CULL_FACE);
+        if (cullEnabled) glEnable(GL_CULL_FACE);
+        else             glDisable(GL_CULL_FACE);
 
         // Hrana 
         glUniform1i(glGetUniformLocation(shaderProgram, "useTex"), 1);
@@ -475,6 +537,61 @@ int main() {
         }
         glUniform1i(glGetUniformLocation(shaderProgram, "transparent"), 0);
 
+        //Kovceg
+        glm::vec3 chestPos(2.0f, 0.0f, -2.0f);
+        float chestScale = 0.8f;             
+        float chestYawDeg = 210.0f;
+        glUniform1i(glGetUniformLocation(shaderProgram, "useTex"), 1);
+        glActiveTexture(GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_2D, chestTexture);
+        glUniform1i(glGetUniformLocation(shaderProgram, "uTex"), 0);
+        glUniform1i(glGetUniformLocation(shaderProgram, "transparent"), 0);
+      
+
+        glm::mat4 Mbase(1.0f);
+        Mbase = glm::translate(Mbase, chestPos);
+        Mbase = glm::rotate(Mbase, glm::radians(-180.0f), glm::vec3(1, 0, 0));
+        Mbase = glm::scale(Mbase, glm::vec3(chestScale));
+        glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "uM"), 1, GL_FALSE, glm::value_ptr(Mbase));
+        chestBase.Draw();
+        glm::mat4 Mlid = Mbase;
+        glm::vec3 hingeOffset = glm::vec3(0.0f, -1.0f, 0.20f); 
+        Mlid = glm::translate(Mlid, hingeOffset);
+        Mlid = glm::rotate(Mlid, -chestLidAngle, glm::vec3(1, 0, 0));
+        Mlid = glm::translate(Mlid, -hingeOffset);
+        glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "uM"), 1, GL_FALSE, glm::value_ptr(Mlid));
+        chestLid.Draw();
+
+        glm::vec3 treasureLightPos = glm::vec3(Mbase * glm::vec4(0.0f, -0.3f, 0.1f, 1.0f));
+        glUniform1i(glGetUniformLocation(shaderProgram, "uTreasureLightOn"), (chestOpen && chestLidAngle > glm::radians(10.0f)));
+        glUniform3fv(glGetUniformLocation(shaderProgram, "uTreasureLightPos"), 1, glm::value_ptr(treasureLightPos));
+
+        // blago
+        if (chestOpen && chestLidAngle > glm::radians(10.0f))
+        {
+            glUniform1i(glGetUniformLocation(shaderProgram, "useTex"), 1);
+            glUniform1i(glGetUniformLocation(shaderProgram, "transparent"), 0);
+            glActiveTexture(GL_TEXTURE0);
+            glUniform1i(glGetUniformLocation(shaderProgram, "uTex"), 0);
+
+            glm::vec3 insideLocal(-0.2f, -1.0f, 0.0f);
+            glBindTexture(GL_TEXTURE_2D, coinTexture);
+            glm::mat4 Mc = Mbase;
+            Mc = glm::translate(Mc, insideLocal);
+            Mc = glm::rotate(Mc, glm::radians(90.0f), glm::vec3(1, 0, 0));
+            Mc = glm::rotate(Mc, glm::radians(90.0f), glm::vec3(0, 0, 1));
+            Mc = glm::scale(Mc, glm::vec3(7.0f));   
+            glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "uM"), 1, GL_FALSE, glm::value_ptr(Mc));
+            coinModel.Draw();
+
+            glBindTexture(GL_TEXTURE_2D, gemTexture);
+            glm::mat4 Mg = Mbase;
+            Mg = glm::translate(Mg, insideLocal + glm::vec3(0.0f, -0.2f, 0.0f));
+            Mg = glm::scale(Mg, glm::vec3(0.35f));  
+            glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "uM"), 1, GL_FALSE, glm::value_ptr(Mg));
+            gemModel.Draw();
+        }
+
 
         // Student
         glDisable(GL_DEPTH_TEST);
@@ -490,8 +607,10 @@ int main() {
         glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
         glBindVertexArray(0);
 
-        glEnable(GL_DEPTH_TEST);
-        glEnable(GL_CULL_FACE);
+        if (depthEnabled) glEnable(GL_DEPTH_TEST);
+        else              glDisable(GL_DEPTH_TEST);
+        if (cullEnabled)  glEnable(GL_CULL_FACE);
+        else              glDisable(GL_CULL_FACE);
 
       
         const double targetFPS = 75.0;
