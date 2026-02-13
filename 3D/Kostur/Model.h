@@ -2,7 +2,7 @@
 #include <string>
 #include <vector>
 #include <unordered_map>
-#include "Mesh.h"   // tvoj Mesh koji radi sa Vertex: pos+col+uv
+#include "Mesh.h"   
 
 class Model {
 public:
@@ -17,9 +17,9 @@ private:
     void loadModel(const std::string& path);
 
     struct IndexKey {
-        int v = 0;   // 1-based from OBJ, 0 means missing
-        int vt = 0;  // 1-based
-        int vn = 0;  // 1-based (ignored for now)
+        int v = 0; 
+        int vt = 0;  
+        int vn = 0;  
 
         bool operator==(const IndexKey& o) const {
             return v == o.v && vt == o.vt && vn == o.vn;
@@ -28,7 +28,7 @@ private:
 
     struct IndexKeyHash {
         size_t operator()(const IndexKey& k) const {
-            // simple hash combine
+         
             size_t h1 = std::hash<int>{}(k.v);
             size_t h2 = std::hash<int>{}(k.vt);
             size_t h3 = std::hash<int>{}(k.vn);
@@ -37,5 +37,5 @@ private:
     };
 
     static bool parseFaceToken(const std::string& tok, IndexKey& out);
-    static int  fixIndex(int idx, int size); // handles negative indices in OBJ
+    static int  fixIndex(int idx, int size);
 };
