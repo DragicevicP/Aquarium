@@ -2,7 +2,6 @@
 #include <fstream>
 #include <sstream>
 #include <iostream>
-
 #include <glm/glm.hpp>
 
 
@@ -50,7 +49,6 @@ int Model::fixIndex(int idx, int size) {
 void Model::loadModel(const std::string& path) {
     std::ifstream file(path);
     if (!file.is_open()) {
-        std::cout << "MODEL: Ne mogu da otvorim: " << path << "\n";
         return;
     }
 
